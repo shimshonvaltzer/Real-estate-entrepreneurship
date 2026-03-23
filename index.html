@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>ניהול משרד נדל"ן</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f4f4f4; padding: 20px; }
+        .department { background: #fff; margin-bottom: 20px; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .project { margin-right: 20px; border-right: 3px solid #007bff; padding-right: 10px; }
+        .stage { margin-right: 20px; color: #555; }
+        .task { margin-right: 20px; list-style-type: check; color: #222; }
+        h2 { color: #007bff; }
+    </style>
+</head>
+<body>
+    <h1>מערכת ניהול נדל"ן 🏗️</h1>
+    <div id="app"></div>
+
+    <script>
+        // מבנה הנתונים של המשרד
+        const officeData = [
+            {
+                name: "מחלקת מכירות",
+                projects: [
+                    {
+                        name: "פרויקט מגדלי העיר",
+                        stages: [
+                            { name: "שלב שיווק", tasks: ["פרסום בעיתונות", "שיחות לידים"] },
+                            { name: "שלב חתימות", tasks: ["פגישות עם עורכי דין"] }
+                        ]
+                    }
+                ]
+            }
+        ];
+
+        // פונקציה להצגת הנתונים על המסך
+        function renderApp() {
+            const container = document.getElementById('app');
+            officeData.forEach(dept => {
+                let deptHtml = `<div class="department"><h2>🏢 ${dept.name}</h2>`;
+                dept.projects.forEach(proj => {
+                    deptHtml += `<div class="project"><h3>📊 ${proj.name}</h3>`;
+                    proj.stages.forEach(stage => {
+                        deptHtml += `<div class="stage"><h4>📅 ${stage.name}</h4><ul>`;
+                        stage.tasks.forEach(task => {
+                            deptHtml += `<li class="task">${task}</li>`;
+                        });
+                        deptHtml += `</ul></div>`;
+                    });
+                    deptHtml += `</div>`;
+                });
+                deptHtml += `</div>`;
+                container.innerHTML += deptHtml;
+            });
+        }
+
+        renderApp();
+    </script>
+</body>
+</html>
