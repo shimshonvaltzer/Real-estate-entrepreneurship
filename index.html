@@ -2,81 +2,109 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>ניהול משרד נדל"ן</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ניהול נדל"ן מתקדם</title>
     <style>
-        body { font-family: sans-serif; background-color: #f4f4f4; padding: 20px; line-height: 1.6; }
-        .controls { background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        input { padding: 10px; width: 250px; border: 1px solid #ccc; border-radius: 4px; margin-left: 10px; }
-        button { padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        button:hover { background-color: #218838; }
-        .department { background: #fff; margin-bottom: 20px; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-right: 5px solid #007bff; }
-        .project { margin-right: 25px; border-right: 2px solid #6c757d; padding-right: 15px; margin-top: 10px; }
-        .stage { margin-right: 25px; color: #555; background: #f9f9f9; padding: 5px; }
-        .task { margin-right: 25px; color: #333; list-style-type: square; }
-        h2 { margin-top: 0; color: #007bff; }
+        :root { --primary: #007bff; --secondary: #6c757d; --success: #28a745; --light: #f8f9fa; }
+        body { font-family: system-ui, -apple-system, sans-serif; background-color: #e9ecef; padding: 10px; margin: 0; line-height: 1.4; }
+        h1 { text-align: center; color: #333; font-size: 1.5rem; }
+        
+        /* עיצוב כללי לתיבות המידע */
+        .container { max-width: 800px; margin: auto; }
+        .card { background: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-right: 5px solid var(--primary); }
+        .project-card { margin-right: 15px; border-right-color: var(--secondary); background: #fdfdfd; }
+        .stage-card { margin-right: 25px; border-right-color: #ffc107; background: #fffdf5; }
+        .task-card { margin-right: 35px; border-right: 2px dashed #333; padding: 5px 10px; }
+        .sub-task { margin-right: 50px; font-size: 0.9rem; color: #555; list-style: circle; }
+
+        /* עיצוב כפתורים ושדות קלט */
+        .add-box { display: flex; gap: 5px; margin-top: 10px; margin-bottom: 10px; }
+        input { flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; }
+        button { padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 12px; white-space: nowrap; }
+        .btn-main { background: var(--primary); color: white; width: 100%; padding: 12px; font-size: 16px; margin-bottom: 20px; }
+        .btn-add { background: var(--success); color: white; }
+        
+        /* התאמה לסלולר */
+        @media (max-width: 600px) {
+            input { width: 60%; }
+            .card { margin-right: 10px !important; }
+        }
     </style>
 </head>
 <body>
 
-    <h1>מערכת ניהול נדל"ן 🏗️</h1>
+<div class="container">
+    <h1>ניהול משרד נדל"ן 🏗️</h1>
 
-    <div class="controls">
-        <input type="text" id="deptInput" placeholder="הכנס שם מחלקה חדשה...">
-        <button onclick="addNewDept()">הוסף מחלקה +</button>
+    <div class="add-box">
+        <input type="text" id="newDept" placeholder="שם מחלקה חדשה...">
+        <button class="btn-add" onclick="addItem('dept')">הוסף מחלקה</button>
     </div>
 
     <div id="app"></div>
+</div>
 
-    <script>
-        // נתונים התחלתיים
-        let officeData = [
-            {
-                name: "מחלקת שיווק",
-                projects: [
-                    {
-                        name: "פרויקט נופי העיר",
-                        stages: [{ name: "תכנון", tasks: ["הכנת מצגת", "סיור שטח"] }]
-                    }
-                ]
-            }
-        ];
+<script>
+    let officeData = [];
 
-        // פונקציה שמוסיפה מחלקה חדשה לרשימה
-        function addNewDept() {
-            const input = document.getElementById('deptInput');
-            const name = input.value;
+    function addItem(type, p1, p2, p3) {
+        let name = "";
+        if(type === 'dept') {
+            name = document.getElementById('newDept').value;
+            if(name) { officeData.push({name: name, projects: []}); document.getElementById('newDept').value = ""; }
+        } else if(type === 'proj') {
+            name = prompt("שם הפרויקט:");
+            if(name) officeData[p1].projects.push({name: name, stages: []});
+        } else if(type === 'stage') {
+            name = prompt("שם השלב:");
+            if(name) officeData[p1].projects[p2].stages.push({name: name, tasks: []});
+        } else if(type === 'task') {
+            name = prompt("שם המשימה:");
+            if(name) officeData[p1].projects[p2].stages[p3].tasks.push({name: name, subTasks: []});
+        } else if(type === 'sub') {
+            name = prompt("שם תת-המשימה:");
+            if(name) officeData[p1].projects[p2].stages[p3].tasks[p1].subTasks.push(name); // פשטנו לצורך הדוגמה
+        }
+        render();
+    }
+
+    function render() {
+        const app = document.getElementById('app');
+        app.innerHTML = "";
+
+        officeData.forEach((dept, di) => {
+            let dDiv = document.createElement('div');
+            dDiv.className = 'card';
+            dDiv.innerHTML = `<h2>🏢 ${dept.name}</h2>
+                <button class="btn-add" onclick="addItem('proj', ${di})">+ פרויקט</button>`;
             
-            if (name.trim() !== "") {
-                officeData.push({ name: name, projects: [] });
-                input.value = ""; // מנקה את התיבה
-                renderApp();      // מעדכן את התצוגה
-            }
-        }
-
-        // פונקציה שמציגה הכל על המסך
-        function renderApp() {
-            const container = document.getElementById('app');
-            container.innerHTML = ""; // ניקוי המסך לפני ציור מחדש
-
-            officeData.forEach(dept => {
-                let html = `<div class="department"><h2>🏢 ${dept.name}</h2>`;
-                dept.projects.forEach(proj => {
-                    html += `<div class="project"><h3>📊 ${proj.name}</h3>`;
-                    proj.stages.forEach(stage => {
-                        html += `<div class="stage"><h4>📅 ${stage.name}</h4><ul>`;
-                        stage.tasks.forEach(task => {
-                            html += `<li class="task">${task}</li>`;
-                        });
-                        html += `</ul></div>`;
+            dept.projects.forEach((proj, pi) => {
+                let pDiv = document.createElement('div');
+                pDiv.className = 'card project-card';
+                pDiv.innerHTML = `<h3>📊 ${proj.name}</h3>
+                    <button class="btn-add" onclick="addItem('stage', ${di}, ${pi})">+ שלב</button>`;
+                
+                proj.stages.forEach((stage, si) => {
+                    let sDiv = document.createElement('div');
+                    sDiv.className = 'card stage-card';
+                    sDiv.innerHTML = `<h4>📅 ${stage.name}</h4>
+                        <button class="btn-add" onclick="addItem('task', ${di}, ${pi}, ${si})">+ משימה</button>`;
+                    
+                    stage.tasks.forEach((task, ti) => {
+                        let tDiv = document.createElement('div');
+                        tDiv.className = 'card task-card';
+                        tDiv.innerHTML = `<b>✅ ${task.name}</b><br>
+                            <button style="background:#eee" onclick="addItem('sub', ${di}, ${pi}, ${si}, ${ti})">+ תת-משימה</button>
+                            <ul>${(task.subTasks || []).map(st => `<li class="sub-task">${st}</li>`).join('')}</ul>`;
+                        sDiv.appendChild(tDiv);
                     });
-                    html += `</div>`;
+                    pDiv.appendChild(sDiv);
                 });
-                html += `</div>`;
-                container.innerHTML += html;
+                dDiv.appendChild(pDiv);
             });
-        }
-
-        renderApp();
-    </script>
+            app.appendChild(dDiv);
+        });
+    }
+</script>
 </body>
 </html>
