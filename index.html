@@ -3,32 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ניהול נדל"ן מתקדם</title>
+    <title>ניהול נדל"ן - מחיקה פרטנית</title>
     <style>
-        :root { --primary: #007bff; --secondary: #6c757d; --success: #28a745; --light: #f8f9fa; }
-        body { font-family: system-ui, -apple-system, sans-serif; background-color: #e9ecef; padding: 10px; margin: 0; line-height: 1.4; }
-        h1 { text-align: center; color: #333; font-size: 1.5rem; }
-        
-        /* עיצוב כללי לתיבות המידע */
+        :root { --primary: #007bff; --success: #28a745; --danger: #ff4d4d; }
+        body { font-family: system-ui, sans-serif; background-color: #f0f2f5; padding: 15px; margin: 0; direction: rtl; }
         .container { max-width: 800px; margin: auto; }
-        .card { background: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-right: 5px solid var(--primary); }
-        .project-card { margin-right: 15px; border-right-color: var(--secondary); background: #fdfdfd; }
-        .stage-card { margin-right: 25px; border-right-color: #ffc107; background: #fffdf5; }
-        .task-card { margin-right: 35px; border-right: 2px dashed #333; padding: 5px 10px; }
-        .sub-task { margin-right: 50px; font-size: 0.9rem; color: #555; list-style: circle; }
-
-        /* עיצוב כפתורים ושדות קלט */
-        .add-box { display: flex; gap: 5px; margin-top: 10px; margin-bottom: 10px; }
-        input { flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; }
-        button { padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 12px; white-space: nowrap; }
-        .btn-main { background: var(--primary); color: white; width: 100%; padding: 12px; font-size: 16px; margin-bottom: 20px; }
-        .btn-add { background: var(--success); color: white; }
+        .card { background: white; padding: 15px; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-right: 5px solid var(--primary); position: relative; }
+        .project-card { margin-right: 15px; border-right-color: #6c757d; }
+        .stage-card { margin-right: 25px; border-right-color: #ffc107; }
+        .task-card { margin-right: 35px; border-right: 2px dashed #333; padding: 10px; }
         
-        /* התאמה לסלולר */
-        @media (max-width: 600px) {
-            input { width: 60%; }
-            .card { margin-right: 10px !important; }
-        }
+        .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .add-box { display: flex; gap: 5px; margin-bottom: 20px; }
+        input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        
+        button { border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-add { background: var(--success); color: white; padding: 5px 10px; font-size: 12px; }
+        .btn-del { background: var(--danger); color: white; padding: 2px 8px; font-size: 11px; margin-right: 5px; }
+        .btn-main-add { background: var(--success); color: white; padding: 10px 15px; }
+        
+        ul { padding-right: 20px; }
+        li { margin-bottom: 5px; display: flex; align-items: center; }
+        h1 { text-align: center; }
+        h2, h3, h4 { margin: 0; }
     </style>
 </head>
 <body>
@@ -38,33 +35,46 @@
 
     <div class="add-box">
         <input type="text" id="newDept" placeholder="שם מחלקה חדשה...">
-        <button class="btn-add" onclick="addItem('dept')">הוסף מחלקה</button>
+        <button class="btn-main-add" onclick="addItem('dept')">הוסף מחלקה +</button>
     </div>
 
     <div id="app"></div>
 </div>
 
 <script>
-    let officeData = [];
+    let officeData = JSON.parse(localStorage.getItem('realEstateData')) || [];
 
-    function addItem(type, p1, p2, p3) {
+    function saveData() {
+        localStorage.setItem('realEstateData', JSON.stringify(officeData));
+    }
+
+    function addItem(type, p1, p2, p3, p4) {
         let name = "";
         if(type === 'dept') {
             name = document.getElementById('newDept').value;
             if(name) { officeData.push({name: name, projects: []}); document.getElementById('newDept').value = ""; }
-        } else if(type === 'proj') {
-            name = prompt("שם הפרויקט:");
-            if(name) officeData[p1].projects.push({name: name, stages: []});
-        } else if(type === 'stage') {
-            name = prompt("שם השלב:");
-            if(name) officeData[p1].projects[p2].stages.push({name: name, tasks: []});
-        } else if(type === 'task') {
-            name = prompt("שם המשימה:");
-            if(name) officeData[p1].projects[p2].stages[p3].tasks.push({name: name, subTasks: []});
-        } else if(type === 'sub') {
-            name = prompt("שם תת-המשימה:");
-            if(name) officeData[p1].projects[p2].stages[p3].tasks[p1].subTasks.push(name); // פשטנו לצורך הדוגמה
+        } else {
+            name = prompt("הכנס שם:");
+            if(!name) return;
+            if(type === 'proj') officeData[p1].projects.push({name: name, stages: []});
+            if(type === 'stage') officeData[p1].projects[p2].stages.push({name: name, tasks: []});
+            if(type === 'task') officeData[p1].projects[p2].stages[p3].tasks.push({name: name, subTasks: []});
+            if(type === 'sub') officeData[p1].projects[p2].stages[p3].tasks[p4].subTasks.push(name);
         }
+        saveData();
+        render();
+    }
+
+    function deleteItem(type, p1, p2, p3, p4, p5) {
+        if(!confirm("למחוק את הפריט?")) return;
+        
+        if(type === 'dept') officeData.splice(p1, 1);
+        else if(type === 'proj') officeData[p1].projects.splice(p2, 1);
+        else if(type === 'stage') officeData[p1].projects[p2].stages.splice(p3, 1);
+        else if(type === 'task') officeData[p1].projects[p2].stages[p3].tasks.splice(p4, 1);
+        else if(type === 'sub') officeData[p1].projects[p2].stages[p3].tasks[p4].subTasks.splice(p5, 1);
+        
+        saveData();
         render();
     }
 
@@ -75,27 +85,38 @@
         officeData.forEach((dept, di) => {
             let dDiv = document.createElement('div');
             dDiv.className = 'card';
-            dDiv.innerHTML = `<h2>🏢 ${dept.name}</h2>
-                <button class="btn-add" onclick="addItem('proj', ${di})">+ פרויקט</button>`;
+            dDiv.innerHTML = `<div class="header-row"><h2>🏢 ${dept.name}</h2> 
+                <div><button class="btn-add" onclick="addItem('proj', ${di})">+ פרויקט</button>
+                <button class="btn-del" onclick="deleteItem('dept', ${di})">X</button></div></div>`;
             
             dept.projects.forEach((proj, pi) => {
                 let pDiv = document.createElement('div');
                 pDiv.className = 'card project-card';
-                pDiv.innerHTML = `<h3>📊 ${proj.name}</h3>
-                    <button class="btn-add" onclick="addItem('stage', ${di}, ${pi})">+ שלב</button>`;
+                pDiv.innerHTML = `<div class="header-row"><h3>📊 ${proj.name}</h3>
+                    <div><button class="btn-add" onclick="addItem('stage', ${di}, ${pi})">+ שלב</button>
+                    <button class="btn-del" onclick="deleteItem('proj', ${di}, ${pi})">X</button></div></div>`;
                 
                 proj.stages.forEach((stage, si) => {
                     let sDiv = document.createElement('div');
                     sDiv.className = 'card stage-card';
-                    sDiv.innerHTML = `<h4>📅 ${stage.name}</h4>
-                        <button class="btn-add" onclick="addItem('task', ${di}, ${pi}, ${si})">+ משימה</button>`;
+                    sDiv.innerHTML = `<div class="header-row"><h4>📅 ${stage.name}</h4>
+                        <div><button class="btn-add" onclick="addItem('task', ${di}, ${pi}, ${si})">+ משימה</button>
+                        <button class="btn-del" onclick="deleteItem('stage', ${di}, ${pi}, ${si})">X</button></div></div>`;
                     
                     stage.tasks.forEach((task, ti) => {
                         let tDiv = document.createElement('div');
                         tDiv.className = 'card task-card';
-                        tDiv.innerHTML = `<b>✅ ${task.name}</b><br>
-                            <button style="background:#eee" onclick="addItem('sub', ${di}, ${pi}, ${si}, ${ti})">+ תת-משימה</button>
-                            <ul>${(task.subTasks || []).map(st => `<li class="sub-task">${st}</li>`).join('')}</ul>`;
+                        tDiv.innerHTML = `<div class="header-row"><span><b>✅ ${task.name}</b></span>
+                            <div><button class="btn-add" style="background:#6c757d" onclick="addItem('sub', ${di}, ${pi}, ${si}, ${ti})">+ תת-משימה</button>
+                            <button class="btn-del" onclick="deleteItem('task', ${di}, ${pi}, ${si}, ${ti})">X</button></div></div>`;
+                        
+                        let ul = document.createElement('ul');
+                        (task.subTasks || []).forEach((st, sti) => {
+                            let li = document.createElement('li');
+                            li.innerHTML = `<button class="btn-del" style="padding:0 5px" onclick="deleteItem('sub', ${di}, ${pi}, ${si}, ${ti}, ${sti})">X</button> ${st}`;
+                            ul.appendChild(li);
+                        });
+                        tDiv.appendChild(ul);
                         sDiv.appendChild(tDiv);
                     });
                     pDiv.appendChild(sDiv);
@@ -105,6 +126,8 @@
             app.appendChild(dDiv);
         });
     }
+
+    render();
 </script>
 </body>
 </html>
