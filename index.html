@@ -3,96 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>מערכת ניהול דמויית Monday</title>
+    <title>ניהול נדל"ן - תפריט אפשרויות</title>
     <style>
         :root {
             --monday-blue: #0073ea;
             --monday-bg: #f5f6f8;
-            --done-green: #00c875;
-            --working-orange: #fdab3d;
-            --stuck-red: #e44258;
             --border-color: #d0d4e4;
+            --text-color: #323338;
         }
-        body { font-family: "Figtree", sans-serif; background-color: var(--monday-bg); margin: 0; padding: 20px; color: #323338; }
+        body { font-family: "Figtree", sans-serif; background-color: var(--monday-bg); margin: 0; padding: 20px; color: var(--text-color); }
         .container { max-width: 1100px; margin: auto; }
-        h1 { color: #323338; font-size: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; }
         
-        /* עיצוב מחלקות ופרויקטים */
-        .dept-section { background: white; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 30px; overflow: hidden; }
-        .dept-header { background: #fff; padding: 15px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
-        .project-group { margin: 15px; border: 1px solid var(--border-color); border-radius: 4px; }
-        .project-title { background: #f8f9fb; padding: 10px; font-weight: bold; display: flex; justify-content: space-between; }
+        .dept-section { background: white; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 30px; position: relative; }
+        .dept-header { padding: 15px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
         
-        /* טבלת משימות בסגנון מאנדיי */
-        table { width: 100%; border-collapse: collapse; background: white; }
+        table { width: 100%; border-collapse: collapse; }
         th { text-align: right; padding: 10px; border-bottom: 1px solid var(--border-color); font-size: 13px; color: #676879; }
-        td { padding: 8px 10px; border-bottom: 1px solid #f1f1f1; font-size: 14px; }
+        td { padding: 8px 10px; border-bottom: 1px solid #f1f1f1; font-size: 14px; position: relative; }
+
+        /* כפתור 3 נקודות ותפריט */
+        .menu-container { position: relative; display: inline-block; }
+        .dots-btn { background: none; border: none; cursor: pointer; font-size: 18px; color: #676879; padding: 5px; }
+        .dots-btn:hover { background: #eee; border-radius: 4px; }
         
-        /* כפתורי סטטוס */
-        .status-btn { border: none; color: white; padding: 8px; width: 100px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; text-align: center; }
-        .status-default { background: #c4c4c4; }
-        .status-done { background: var(--done-green); }
-        .status-working { background: var(--working-orange); }
-        .status-stuck { background: var(--stuck-red); }
+        .dropdown-menu { 
+            display: none; position: absolute; left: 0; top: 100%; 
+            background: white; border: 1px solid var(--border-color); 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 4px; 
+            z-index: 100; min-width: 120px;
+        }
+        .dropdown-menu button { 
+            display: block; width: 100%; text-align: right; padding: 10px; 
+            border: none; background: none; font-size: 13px; cursor: pointer; 
+        }
+        .dropdown-menu button:hover { background: #f0f0f0; }
+        .show { display: block; }
 
-        /* כפתורים כלליים */
-        button { cursor: pointer; transition: opacity 0.2s; }
-        .add-btn { background: var(--monday-blue); color: white; border: none; padding: 8px 15px; border-radius: 4px; font-size: 13px; }
-        .del-btn { background: none; border: none; color: #676879; font-size: 16px; margin-right: 10px; }
-        .del-btn:hover { color: var(--stuck-red); }
-
-        .add-row-btn { color: var(--monday-blue); background: none; border: 1px dashed var(--monday-blue); width: 100%; padding: 8px; margin-top: 5px; text-align: right; }
+        .add-btn { background: var(--monday-blue); color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; }
+        .status-btn { border: none; color: white; padding: 6px; width: 90px; border-radius: 4px; font-size: 11px; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div style="display:flex; justify-content:space-between; align-items:center">
-        <h1>לוח עבודה נדל"ן - Monday Style 🏗️</h1>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h1>ניהול פרויקטים נדל"ן 🏗️</h1>
         <button class="add-btn" onclick="addItem('dept')">+ מחלקה חדשה</button>
     </div>
-
     <div id="app"></div>
 </div>
 
 <script>
-    let officeData = JSON.parse(localStorage.getItem('mondayData')) || [];
+    let officeData = JSON.parse(localStorage.getItem('proData')) || [];
 
-    const statusMap = {
-        "חדש": "status-default",
-        "בוצע": "status-done",
-        "בתהליך": "status-working",
-        "תקוע": "status-stuck"
-    };
+    function saveData() { localStorage.setItem('proData', JSON.stringify(officeData)); }
 
-    function saveData() { localStorage.setItem('mondayData', JSON.stringify(officeData)); }
-
-    function addItem(type, p1, p2, p3) {
+    function addItem(type, p1, p2) {
         let name = prompt(`הכנס שם ל${type}:`);
         if(!name) return;
-
         if(type === 'dept') officeData.push({name: name, projects: []});
         else if(type === 'proj') officeData[p1].projects.push({name: name, tasks: []});
         else if(type === 'task') officeData[p1].projects[p2].tasks.push({name: name, status: "חדש"});
+        saveData(); render();
+    }
+
+    function toggleMenu(id) {
+        document.querySelectorAll('.dropdown-menu').forEach(m => {
+            if(m.id !== id) m.classList.remove('show');
+        });
+        document.getElementById(id).classList.toggle('show');
+    }
+
+    function editItem(type, p1, p2, p3) {
+        let currentName = "";
+        if(type === 'dept') currentName = officeData[p1].name;
+        else if(type === 'proj') currentName = officeData[p1].projects[p2].name;
+        else if(type === 'task') currentName = officeData[p1].projects[p2].tasks[p3].name;
+
+        let newName = prompt("ערוך שם:", currentName);
+        if(!newName) return;
+
+        if(type === 'dept') officeData[p1].name = newName;
+        else if(type === 'proj') officeData[p1].projects[p2].name = newName;
+        else if(type === 'task') officeData[p1].projects[p2].tasks[p3].name = newName;
         
         saveData(); render();
     }
 
-    function toggleStatus(di, pi, ti) {
-        const states = ["חדש", "בתהליך", "תקוע", "בוצע"];
-        let current = officeData[di].projects[pi].tasks[ti].status;
-        let next = states[(states.indexOf(current) + 1) % states.length];
-        officeData[di].projects[pi].tasks[ti].status = next;
-        saveData(); render();
-    }
-
     function deleteItem(type, p1, p2, p3) {
-        if(!confirm("למחוק?")) return;
+        if(!confirm("למחוק לצמיתות?")) return;
         if(type === 'dept') officeData.splice(p1, 1);
         else if(type === 'proj') officeData[p1].projects.splice(p2, 1);
         else if(type === 'task') officeData[p1].projects[p2].tasks.splice(p3, 1);
         saveData(); render();
     }
+
+    function moveItem() { alert("פונקציית העברה תתווסף בגרסה הבאה!"); }
 
     function render() {
         const app = document.getElementById('app');
@@ -101,37 +107,43 @@
         officeData.forEach((dept, di) => {
             let dDiv = document.createElement('div');
             dDiv.className = 'dept-section';
-            dDiv.innerHTML = `<div class="dept-header"><h2>🏢 ${dept.name}</h2>
-                <div><button class="add-btn" onclick="addItem('proj', ${di})">+ פרויקט</button>
-                <button class="del-btn" onclick="deleteItem('dept', ${di})">🗑️</button></div></div>`;
+            dDiv.innerHTML = `
+                <div class="dept-header">
+                    <h2>🏢 ${dept.name}</h2>
+                    <div class="menu-container">
+                        <button class="add-btn" onclick="addItem('proj', ${di})">+ פרויקט</button>
+                        <button class="dots-btn" onclick="toggleMenu('m-dept-${di}')">⋮</button>
+                        <div id="m-dept-${di}" class="dropdown-menu">
+                            <button onclick="editItem('dept', ${di})">✏️ עריכה</button>
+                            <button onclick="moveItem()">➡️ העברה</button>
+                            <button onclick="deleteItem('dept', ${di})" style="color:red">🗑️ מחיקה</button>
+                        </div>
+                    </div>
+                </div>`;
             
             dept.projects.forEach((proj, pi) => {
-                let pDiv = document.createElement('div');
-                pDiv.className = 'project-group';
-                let tableHtml = `
-                    <div class="project-title"><span>📊 ${proj.name}</span> <button class="del-btn" onclick="deleteItem('proj', ${di}, ${pi})">🗑️</button></div>
-                    <table>
-                        <thead><tr><th style="width:20px"></th><th>משימה</th><th style="width:120px">סטטוס</th></tr></thead>
-                        <tbody>`;
+                let pTable = document.createElement('div');
+                pTable.style.padding = "10px";
+                let html = `
+                    <div style="display:flex; justify-content:space-between; background:#f8f9fb; padding:10px;">
+                        <strong>📊 ${proj.name}</strong>
+                        <div class="menu-container">
+                            <button class="dots-btn" onclick="toggleMenu('m-proj-${di}-${pi}')">⋮</button>
+                            <div id="m-proj-${di}-${pi}" class="dropdown-menu">
+                                <button onclick="editItem('proj', ${di}, ${pi})">✏️ עריכה</button>
+                                <button onclick="moveItem()">➡️ העברה</button>
+                                <button onclick="deleteItem('proj', ${di}, ${pi})" style="color:red">🗑️ מחיקה</button>
+                            </div>
+                        </div>
+                    </div>
+                    <table><tbody>`;
                 
                 proj.tasks.forEach((task, ti) => {
-                    tableHtml += `
-                        <tr>
-                            <td><button class="del-btn" style="font-size:12px" onclick="deleteItem('task', ${di}, ${pi}, ${ti})">✕</button></td>
-                            <td>${task.name}</td>
-                            <td><button class="status-btn ${statusMap[task.status]}" onclick="toggleStatus(${di}, ${pi}, ${ti})">${task.status}</button></td>
-                        </tr>`;
-                });
-                
-                tableHtml += `</tbody></table>
-                    <button class="add-row-btn" onclick="addItem('task', ${di}, ${pi})">+ הוסף משימה</button>`;
-                pDiv.innerHTML = tableHtml;
-                dDiv.appendChild(pDiv);
-            });
-            app.appendChild(dDiv);
-        });
-    }
-    render();
-</script>
-</body>
-</html>
+                    html += `<tr>
+                        <td style="width:30px">
+                            <div class="menu-container">
+                                <button class="dots-btn" onclick="toggleMenu('m-task-${di}-${pi}-${ti}')">⋮</button>
+                                <div id="m-task-${di}-${pi}-${ti}" class="dropdown-menu">
+                                    <button onclick="editItem('task', ${di}, ${pi}, ${ti})">✏️ עריכה</button>
+                                    <button onclick="moveItem()">➡️ העברה</button>
+                                    <button onclick="deleteItem('task', ${di}, ${pi}, ${ti})" style="color:red">🗑️
