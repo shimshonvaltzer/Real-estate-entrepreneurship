@@ -146,4 +146,23 @@
                                 <div id="m-task-${di}-${pi}-${ti}" class="dropdown-menu">
                                     <button onclick="editItem('task', ${di}, ${pi}, ${ti})">✏️ עריכה</button>
                                     <button onclick="moveItem()">➡️ העברה</button>
-                                    <button onclick="deleteItem('task', ${di}, ${pi}, ${ti})" style="color:red">🗑️
+                                    <button onclick="deleteItem('task', ${di}, ${pi}, ${ti})" style="color:red">🗑️ מחיקה</button>
+                                </div>
+                            </div>
+                        </td>
+                        <td>${task.name}</td>
+                        <td style="width:100px"><button class="status-btn" style="background:#00c875">${task.status}</button></td>
+                    </tr>`;
+                });
+                html += `</tbody></table><button style="color:var(--monday-blue); background:none; border:none; padding:10px; cursor:pointer" onclick="addItem('task', ${di}, ${pi})">+ הוסף משימה</button>`;
+                pTable.innerHTML = html;
+                dDiv.appendChild(pTable);
+            });
+            app.appendChild(dDiv);
+        });
+    }
+    render();
+    window.onclick = function(event) { if (!event.target.matches('.dots-btn')) { document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show')); } }
+</script>
+</body>
+</html>
